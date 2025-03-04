@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
+import Notification from './components/Notification';
 import personServices from './services/persons';
 
 const App = () => {
@@ -9,6 +10,8 @@ const App = () => {
   const [ newName, setNewName] = useState('');
   const [ newNumber, setNewNumber ] = useState('');
   const [ search, setSearch ] = useState('');
+  const [ message, setMessage ] = useState(null);
+  const [ typeNotification, setTypeNotification ] = useState(null);
 
   useEffect(()=>{
     personServices
@@ -32,6 +35,12 @@ const App = () => {
           .updatePhone(existedName.id, changedInfo)
           .then( response => {
               setPersons(persons.map(person => person.id !== existedName.id ? person : response));
+              setMessage(`${response.name} updated`);
+              setTypeNotification('done')
+              setTimeout(()=>{
+                setMessage(null)
+                setTypeNotification(null)
+              },5000);
               setNewName('');
               setNewNumber('');
             }
@@ -47,6 +56,12 @@ const App = () => {
         .create(nameObject)
         .then(person => {
           setPersons(persons.concat(person));
+          setMessage(`${person.name} created`);
+          setTypeNotification('done')
+          setTimeout(()=>{
+            setMessage(null)
+            setTypeNotification(null)
+          },5000);
           setNewName('');
           setNewNumber('');
         })      
@@ -77,12 +92,22 @@ const App = () => {
               const newList = persons.filter(p => p.id !== response.id);
               setPersons(newList);
             })
+            .catch(error => {
+              setMessage(`Information of ${person.name} has already been removed from server`);
+              setTypeNotification('error')
+              setTimeout(()=>{
+                setMessage(null)
+                setTypeNotification(null)
+              },5000);
+              setPersons(persons.filter(n => n.id !== person.id))
+            })
     }
 }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message = { message } type = { typeNotification } />
       <Filter search= { search } handleSearchChange= { handleSearchChange }/>
       <h2>Add a new contact</h2>
       <PersonForm addName= {addName} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
