@@ -3,9 +3,13 @@ const Persons = (props) => {
         <div>
             {
                 props.filteredPersons.map((person) => (
-                <p key={person.id}>
-                {person.name} {person.number}
-                </p>
+                    <div>
+                        <p key={person.id}>
+                        {person.name} {person.number}
+                        </p>
+                        {/* <button onClick={props.deletePerson}>{props.label}</button> */}
+                    </div>
+                
                 ))
             }
         </div>

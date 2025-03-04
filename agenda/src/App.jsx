@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
-import axios from 'axios';
+import personServices from './services/persons';
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
@@ -11,10 +11,10 @@ const App = () => {
   const [ search, setSearch ] = useState('');
 
   useEffect(()=>{
-    axios
-     .get('http://localhost:3001/persons')
-     .then(response => {
-      setPersons(response.data);
+    personServices
+      .getAll()
+      .then(person => {
+      setPersons(person);
      })
   }, [])
 
@@ -29,10 +29,18 @@ const App = () => {
         number: newNumber,
         id: persons.length + 1
       }
-      setPersons(persons.concat(nameObject));
-      setNewName('');
-      setNewNumber('');
-    }    
+      personServices
+        .create(nameObject)
+        .then(person => {
+          setPersons(persons.concat(person));
+          setNewName('');
+          setNewNumber('');
+        })      
+    }
+  }
+
+  const deletePerson = (id) => {
+
   }
 
   const handleNameChange = (event) => {
