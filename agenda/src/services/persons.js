@@ -13,7 +13,8 @@ const create = (data) => {
 }
 
 const deletePerson = (id) => {
-    return axios.delete(`${baseUrl}/${id}`);
+    const response = axios.delete(`${baseUrl}/${id}`);
+    return response.then(response => response.data);
 }
 
 export default {

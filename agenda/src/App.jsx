@@ -27,7 +27,7 @@ const App = () => {
       const nameObject = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1
+        id: (persons.length + 1).toString()
       }
       personServices
         .create(nameObject)
@@ -37,10 +37,6 @@ const App = () => {
           setNewNumber('');
         })      
     }
-  }
-
-  const deletePerson = (id) => {
-
   }
 
   const handleNameChange = (event) => {
@@ -59,6 +55,17 @@ const App = () => {
     person.name.toLowerCase().includes(search.toLowerCase()) // Devuelve true si encuentra coincidencia
   );
 
+  const deletePerson = (person) => {
+    if(confirm(`Delete ${person.name}?`)){
+        personServices
+            .deletePerson(person.id)
+            .then(response => {
+              const newList = persons.filter(p => p.id !== response.id);
+              setPersons(newList);
+            })
+    }
+}
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -66,7 +73,7 @@ const App = () => {
       <h2>Add a new contact</h2>
       <PersonForm addName= {addName} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons filteredPersons={filteredPersons}/>
+      <Persons filteredPersons={filteredPersons} deletePerson = {deletePerson}/>
     </div>
   )
 }
