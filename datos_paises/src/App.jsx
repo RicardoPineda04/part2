@@ -3,16 +3,19 @@ import countriesServices from './services/countries';
 
 const App = () => {
   const [message, setMessage] = useState(null);
-  const [countries, setCountries] = useState([])
-  const [country, setCountry] = useState('')
+  const [countries, setCountries] = useState([]);
+  const [country, setCountry] = useState(null);
+  const [weather, setWeather] = useState(null);
+  const [searchCountry, setSearchCountry] = useState('');
+
 
   useEffect(() => {
-    if (country) {
+    if (searchCountry) {
       countriesServices
         .getCountries()
         .then(response => {
           const countriesFind = response.filter(c => {
-            return c.name.common.toLowerCase().includes(country.toLowerCase())
+            return c.name.common.toLowerCase().includes(searchCountry.toLowerCase())
           });      
           if(countriesFind.length > 10){
             setMessage('Too many matches, specify another filter')
@@ -21,28 +24,47 @@ const App = () => {
             setMessage(null)
             setCountries(countriesFind)
           }
-          if(country.length == 1){
+          if(searchCountry.length === 1){
             setMessage(null)
             setCountries([])
           }          
         })
     }
-  }, [country])
+  }, [searchCountry])
 
   const handleChange = (event) => {   
-    setCountry(event.target.value)
+    setSearchCountry(event.target.value)
+  }
+
+  const selectCountry = (name) => {
+    countriesServices
+      .getCountry(name)
+      .then(res => {
+        countriesServices.getWeather(res.capitalInfo.latlng)
+          .then(wea => {
+            setWeather(wea);
+          })
+        setMessage(null)
+        setCountries([])
+        setCountry(res);
+      })
   }
 
   return (
     <div>
       <form>
-        Country: <input value={country} onChange={handleChange} />
+        Country: <input value={searchCountry} onChange={handleChange} />
       </form>
       <p>{message ?? message}</p>
       {
         countries.length > 1 && countries.length <= 10 
         ? countries.map(country => {
-            return <p key={country.name.common}>{country.name.common}</p>
+            return (
+              <div key={country.name.common}>
+                <p>{country.name.common}</p>
+                <button onClick={()=> selectCountry(country.name.common)}>Show</button>
+              </div>              
+            )
           })
         : countries.map(country => {
           return (
@@ -62,6 +84,30 @@ const App = () => {
             </div>
           )
         })
+      }
+      { country === null 
+          ? <p></p> 
+          : <div>
+                <h2>{country.name.common}</h2>
+                <p>Capital: {country.capital}</p>
+                <p>Area: {country.area}</p>
+                <h2>Languages</h2>
+                <ul>
+                  {
+                    Object.entries(country.languages).map(([key, value])=> {
+                      return <li key={key}>{value}</li>
+                    })
+                  }
+                </ul>
+                <img src={country.flags.png} alt={country.name.common} />
+                {weather && (
+                  <>
+                    <p>Temperature: {weather.main.temp} C</p>
+                    <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`} alt="" />
+                    <p>Wind: {weather.wind.speed} m/s</p>
+                  </>
+                )}
+            </div>
       }
     </div>
   )
