@@ -30,7 +30,7 @@ const App = () => {
         const changedInfo = {
           ...existedName,
           number: newNumber,
-        };
+        };        
         personServices
           .updatePhone(existedName.id, changedInfo)
           .then( response => {
@@ -50,7 +50,6 @@ const App = () => {
       const nameObject = {
         name: newName,
         number: newNumber,
-        id: (persons.length + 1).toString()
       }
       personServices
         .create(nameObject)
@@ -64,7 +63,15 @@ const App = () => {
           },5000);
           setNewName('');
           setNewNumber('');
-        })      
+        })
+        .catch(error => {          
+          setMessage(`${error.response.data.error}`);
+          setTypeNotification('error')
+          setTimeout(()=>{
+            setMessage(null)
+            setTypeNotification(null)
+          },5000);
+        })    
     }
   }
 
@@ -89,7 +96,7 @@ const App = () => {
         personServices
             .deletePerson(person.id)
             .then(response => {
-              const newList = persons.filter(p => p.id !== response.id);
+              const newList = persons.filter(p => p.id !== person.id);
               setPersons(newList);
             })
             .catch(error => {
